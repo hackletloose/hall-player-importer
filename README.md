@@ -43,3 +43,26 @@ Both the blacklist and seeder text files should have the following format:
 
 ```bash
 python script.py
+
+The script will:
+
+- Create a blacklist using the specified `BLACKLIST_NAME`.
+- Add players from the blacklist file to the newly created blacklist.
+- Add infinite VIP status to players from the active seeder file.
+- Add expired VIP status to players from the passive seeder file.
+- Flag players from the active seeder file with the flags 😀🌱.
+- Flag players from the passive seeder file with the flag 🌱.
+
+```env
+LOGFILE=logfile.log
+BLACKLIST_FILE_PATH=./data/blacklist.txt
+ACTIVE_SEEDER_FILE_PATH=./data/active_seeder.txt
+PASSIVE_SEEDER_FILE_PATH=./data/passive_seeder.txt
+BLACKLIST_NAME=my_blacklist
+REASON=Violation of server rules
+ADMIN_NAME=admin123
+API_URL=https://api.example.com
+API_KEY=your_api_key_here
+```
+## License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
