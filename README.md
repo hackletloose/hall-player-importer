@@ -1,4 +1,4 @@
-# Blacklist and VIP Management Script
+# Blacklist and VIP- and User-Management Script
 
 This Python script automates the process of managing a blacklist and VIP list for a game server. It reads player data from text files, adds them to the blacklist or VIP list via API requests, and flags them with specific tags. The script is customizable via environment variables defined in a `.env` file.
 
