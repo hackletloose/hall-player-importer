@@ -43,6 +43,7 @@ Both the blacklist and seeder text files should have the following format:
 
 ```bash
 python script.py
+```
 
 The script will:
 
