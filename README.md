@@ -1,69 +1,69 @@
-# Blacklist and VIP- and User-Management Script
 
-This Python script automates the process of managing a blacklist and VIP list for a game server. It reads player data from text files, adds them to the blacklist or VIP list via API requests, and flags them with specific tags. The script is customizable via environment variables defined in a `.env` file.
+# Hall Player Importer
 
-## Features
+The **Hall Player Importer** bot is designed to manage player lists (banned players, VIPs, and non-VIPs) using an importer script. This README will guide you through the setup and usage of the bot.
 
-- **Create and manage blacklists**: Automatically create and retrieve blacklists from the API, and add players to the blacklist based on a text file.
-- **Manage VIP status**: Add VIP status to players based on active and passive seeder files.
-- **Flag players**: Assign custom flags (e.g., seeding, grinning) to players from the active seeder file.
-- **Logging**: Detailed logs of each action, stored in a log file.
+## Project Structure
 
-## Prerequisites
+- **.env**: Stores environment variables and sensitive configuration settings.
+- **ban_players.txt**: A list of banned players.
+- **non_vip_players.txt**: A list of non-VIP players.
+- **player-importer.py**: The main script that runs the player import functionalities.
+- **vip_players.txt**: A list of VIP players.
 
+## Requirements
+
+To run this bot, ensure you have the following installed:
 - Python 3.x
-- `requests` library: Install with `pip install requests`
-- `python-dotenv` library: Install with `pip install python-dotenv`
-- API access with an API key and valid URLs.
+- Required Python libraries (can be installed via `pip`)
+
+## Installation
+
+1. Clone the repository or download the project files.
+2. Install the necessary dependencies:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3. Set up your environment variables by configuring the `.env` file.
 
 ## Environment Variables
 
-Create a `.env` file in the root directory to configure the script. The following environment variables are required:
+In the `.env` file, configure the following:
 
-- `LOGFILE`: Path to the log file where logs will be stored.
-- `BLACKLIST_FILE_PATH`: Path to the text file containing players to be blacklisted.
-- `ACTIVE_SEEDER_FILE_PATH`: Path to the text file containing players to be added as active seeders (VIPs).
-- `PASSIVE_SEEDER_FILE_PATH`: Path to the text file containing passive seeders (VIPs).
-- `BLACKLIST_NAME`: Name of the blacklist to create or retrieve.
-- `REASON`: Reason for blacklisting a player.
-- `ADMIN_NAME`: Name of the admin performing the blacklist operation.
-- `API_URL`: Base URL of the API.
-- `API_KEY`: Authorization key to access the API.
+- `API_URL`: The endpoint for the API to manage players.
+- `API_KEY`: Your API key for authentication.
+- `ADMIN_NAME`: The administrator name to log actions.
+- `REASON`: The reason to be used when banning or flagging players.
 
-## Text File Format
+Example `.env`:
 
-Both the blacklist and seeder text files should have the following format:
-`steam_id,player_name`
+```bash
+API_URL="http://your-api-url.com"
+API_KEY="your-api-key"
+ADMIN_NAME="your-admin-name"
+REASON="violated terms"
+```
 
 ## Usage
 
-1. Configure the `.env` file with the necessary environment variables.
-2. Prepare the blacklist and seeder files in the correct format.
-3. Run the script:
+To run the bot, execute the `player-importer.py` script:
 
 ```bash
-python script.py
+python player-importer.py
 ```
 
-The script will:
+### Features:
 
-- Create a blacklist using the specified `BLACKLIST_NAME`.
-- Add players from the blacklist file to the newly created blacklist.
-- Add infinite VIP status to players from the active seeder file.
-- Add expired VIP status to players from the passive seeder file.
-- Flag players from the active seeder file with the flags 😀🌱.
-- Flag players from the passive seeder file with the flag 🌱.
+1. **Ban Players**: The bot can ban players listed in `ban_players.txt`.
+2. **VIP Players**: Assign VIP status to players listed in `vip_players.txt`.
+3. **Non-VIP Players**: Manage non-VIP players listed in `non_vip_players.txt`.
 
-```env
-LOGFILE=logfile.log
-BLACKLIST_FILE_PATH=./data/blacklist.txt
-ACTIVE_SEEDER_FILE_PATH=./data/active_seeder.txt
-PASSIVE_SEEDER_FILE_PATH=./data/passive_seeder.txt
-BLACKLIST_NAME=my_blacklist
-REASON=Violation of server rules
-ADMIN_NAME=admin123
-API_URL=https://api.example.com
-API_KEY=your_api_key_here
-```
+## Contributing
+
+Feel free to fork the repository and create a pull request if you would like to contribute to the development of this project.
+
 ## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+This project is licensed under the MIT License.
