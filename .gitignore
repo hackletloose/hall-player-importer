@@ -161,3 +161,5 @@ cython_debug/
 passive_seeders.txt
 active_seeders.txt
 ban_players.txt
+non_vip_players.txt
+vip_players.txt
