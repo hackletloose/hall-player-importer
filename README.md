@@ -66,9 +66,12 @@ The script will:
 
 ```env
 LOGFILE=logfile.log
-BLACKLIST_FILE_PATH=./data/blacklist.txt
-VIP_PLAYERS_FILE_PATH=./data/vip_players.txt
-NON_VIP_PLAYERS_FILE_PATH=./data/non_vip_players.txt
+BLACKLIST_FILE_PATH=ban_players.txt
+VIP_PLAYERS_FILE_PATH=vip_players.txt
+VIP_FIRST_FLAG=🌱
+VIP_SECOND_FLAG=😀
+NON_VIP_PLAYERS_FILE_PATH=non_vip_players.txt
+NON_VIP_FLAG=🌱
 BLACKLIST_NAME=my_blacklist
 REASON=Violation of server rules
 ADMIN_NAME=admin123
