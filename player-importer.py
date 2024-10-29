@@ -83,6 +83,10 @@ class ImportView(View):
             await interaction.followup.send("Timeout on input.", ephemeral=True)
             return None
 
+async def send_progress(interaction, total, completed):
+    progress = (completed / total) * 100
+    await interaction.followup.send(f"**Progress:** {progress:.2f}% complete", ephemeral=True)
+
 async def perform_import(api_url, api_key, interaction):
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -100,6 +104,10 @@ async def perform_import(api_url, api_key, interaction):
     vip_players = read_players_from_file(vip_players_file_path)
     non_vip_players = read_players_from_file(non_vip_players_file_path)
     all_players = players + vip_players + non_vip_players
+    total_players = len(all_players)
+    completed_players = 0
+
+    await interaction.response.send_message("**Import in progress...** Please relax. You will be informed by direct message with a log file attached!", ephemeral=True)
 
     async with aiohttp.ClientSession() as session:
         removal_tasks = []
@@ -110,7 +118,13 @@ async def perform_import(api_url, api_key, interaction):
                 remove_temp_ban(session, remove_temp_ban_url, headers, {"player_id": player_id}, player_id),
                 remove_vip_status(session, remove_vip_url, headers, {"player_id": player_id}, player_id)
             ])
+            completed_players += 1
+            if completed_players % 10 == 0:
+                await send_progress(interaction, total_players, completed_players)
+                await asyncio.sleep(10)
+
         await asyncio.gather(*removal_tasks)
+        
         try:
             blacklist_id = await create_or_get_blacklist(session, headers, create_blacklist_url, get_blacklists_url, blacklist_name)
             tasks = [
@@ -123,6 +137,8 @@ async def perform_import(api_url, api_key, interaction):
             await asyncio.gather(*tasks)
         except Exception as e:
             logging.error(f"⛔ | ERROR    | {e}")
+
+    await interaction.followup.send("Import complete! You will receive a direct message with the log file.")
 
 async def remove_perma_ban(session, url, headers, json_data, player_id):
     try:
@@ -293,6 +309,22 @@ async def flag_player(session, player_id, player_name, headers, url, flag, comme
     except Exception as e:
         logging.error(f"⛔ | ERROR    | 🚩 Add Flag {flag}      | ID: {player_id} | Name: {player_name} | {e}")
 
+async def discord_request_with_retry(interaction, message, view=None):
+    while True:
+        try:
+            if view:
+                await interaction.channel.send(message, view=view)
+            else:
+                await interaction.channel.send(message)
+            break  # Anfrage erfolgreich, Schleife verlassen
+        except discord.errors.HTTPException as e:
+            if e.status == 429:
+                print("Headers:", response.headers)
+                retry_after = int(e.response.headers.get("Retry-After", 1))
+                await asyncio.sleep(retry_after)
+            else:
+                raise e
+
 @bot.event
 async def on_ready():
     print(f'Bot is ready. Logged in as {bot.user}')
@@ -300,7 +332,7 @@ async def on_ready():
     channel = bot.get_channel(channel_id)
 
     if channel:
-        await channel.send("To import Player Data, please go ahead!", view=ImportView())
+        await discord_request_with_retry(channel, "To import Player Data, please go ahead!", view=ImportView())
     else:
         print(f"Channel ID {channel_id} not found.")
 
