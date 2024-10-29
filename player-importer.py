@@ -35,7 +35,7 @@ non_vip_flag = os.getenv("NON_VIP_FLAG")
 
 class ImportModal(ui.Modal):
     def __init__(self):
-        super().__init__(title="Input your API Data")
+        super().__init__(title="Input your CRCON Data")
         self.add_item(ui.TextInput(
             label="CRCON URL", 
             placeholder="https://rcon.example.com",
@@ -43,7 +43,7 @@ class ImportModal(ui.Modal):
         ))
         self.add_item(ui.TextInput(
             label="API Token", 
-            placeholder="paste your **ADMIN** API-Token here",
+            placeholder="paste your Admin API-Token here",
             custom_id="api_token",
             style=discord.TextStyle.short
         ))
@@ -68,7 +68,7 @@ class ImportView(View):
         self.api_url = None
         self.api_key = None
 
-    @discord.ui.button(label="Import Seeding-Preconfig", style=discord.ButtonStyle.primary, custom_id="import_button")
+    @discord.ui.button(label="Import Accounts", style=discord.ButtonStyle.primary, custom_id="import_button")
     async def import_button(self, interaction: discord.Interaction, button: ui.Button):
         await interaction.response.send_modal(ImportModal())
 
