@@ -309,21 +309,21 @@ async def flag_player(session, player_id, player_name, headers, url, flag, comme
     except Exception as e:
         logging.error(f"⛔ | ERROR    | 🚩 Add Flag {flag}      | ID: {player_id} | Name: {player_name} | {e}")
 
-async def discord_request_with_retry(interaction, message, view=None):
+async def discord_request_with_retry(channel, message, view=None):
     while True:
         try:
             if view:
-                await interaction.channel.send(message, view=view)
+                await channel.send(message, view=view)
             else:
-                await interaction.channel.send(message)
-            break  # Anfrage erfolgreich, Schleife verlassen
+                await channel.send(message)
+            break
         except discord.errors.HTTPException as e:
             if e.status == 429:
-                print("Headers:", response.headers)
                 retry_after = int(e.response.headers.get("Retry-After", 1))
                 await asyncio.sleep(retry_after)
             else:
                 raise e
+
 
 @bot.event
 async def on_ready():
