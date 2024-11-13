@@ -6,6 +6,7 @@ import os
 import aiohttp
 import asyncio
 from dotenv import load_dotenv
+import json
 import logging
 
 load_dotenv()
@@ -20,7 +21,7 @@ logging.basicConfig(
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
-
+MESSAGE_ID_FILE = 'message_id.json'
 TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 CHANNEL_ID = int(os.getenv('DISCORD_CHANNEL_ID'))
 blacklist_name = os.getenv("BLACKLIST_NAME")
@@ -82,6 +83,20 @@ class ImportView(View):
         except asyncio.TimeoutError:
             await interaction.followup.send("Timeout on input.", ephemeral=True)
             return None
+def save_message_id(message_id):
+    """Save the message ID to a file"""
+    with open(MESSAGE_ID_FILE, 'w') as f:
+        json.dump({"message_id": message_id}, f)
+
+def load_message_id():
+    """Load the message ID from a file, if it exists and is not empty"""
+    try:
+        with open(MESSAGE_ID_FILE, 'r') as f:
+            data = json.load(f)
+            return data.get("message_id")
+    except (FileNotFoundError, json.JSONDecodeError):
+        # Rückgabe von None, falls Datei nicht existiert oder das JSON ungültig ist
+        return None
 
 async def send_progress(interaction, total, completed):
     progress = (completed / total) * 100
@@ -309,31 +324,48 @@ async def flag_player(session, player_id, player_name, headers, url, flag, comme
     except Exception as e:
         logging.error(f"⛔ | ERROR    | 🚩 Add Flag {flag}      | ID: {player_id} | Name: {player_name} | {e}")
 
-async def discord_request_with_retry(channel, message, view=None):
+async def discord_request_with_retry(interaction, message, view=None):
     while True:
         try:
             if view:
-                await channel.send(message, view=view)
+                await interaction.channel.send(message, view=view)
             else:
-                await channel.send(message)
-            break
+                await interaction.channel.send(message)
+            break  # Anfrage erfolgreich, Schleife verlassen
         except discord.errors.HTTPException as e:
             if e.status == 429:
+                print("Headers:", response.headers)
                 retry_after = int(e.response.headers.get("Retry-After", 1))
                 await asyncio.sleep(retry_after)
             else:
                 raise e
 
-
 @bot.event
 async def on_ready():
     print(f'Bot is ready. Logged in as {bot.user}')
-    channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
-    channel = bot.get_channel(channel_id)
+    channel = bot.get_channel(CHANNEL_ID)
 
     if channel:
-        await discord_request_with_retry(channel, "To import Player Data, please go ahead!", view=ImportView())
+        # Load the saved message ID
+        message_id = load_message_id()
+        
+        if message_id:
+            try:
+                # Try to fetch the existing message
+                message = await channel.fetch_message(message_id)
+                await message.edit(content="To import Player Data, please go ahead!", view=ImportView())
+                print("Existing message found and edited.")
+            except discord.NotFound:
+                # If the message doesn't exist, send a new one
+                message = await channel.send("To import Player Data, please go ahead!", view=ImportView())
+                save_message_id(message.id)
+                print("Message not found; new message sent and ID saved.")
+        else:
+            # Send a new message and save the message ID
+            message = await channel.send("To import Player Data, please go ahead!", view=ImportView())
+            save_message_id(message.id)
+            print("No previous message ID found; new message sent and ID saved.")
     else:
-        print(f"Channel ID {channel_id} not found.")
+        print(f"Channel ID {CHANNEL_ID} not found.")
 
 bot.run(TOKEN)
